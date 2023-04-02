@@ -1,55 +1,73 @@
-import dao.RoleDAO;
-import dao.UserDAO;
-import dao.impl.RoleDAOImpl;
-import dao.impl.UserDAOImpl;
+import dao.UserAndRoleDAO;
+import dao.impl.UserAndRoleDAOImpl;
 import model.Role;
 import model.User;
 
 
 public class Main {
-    private static final UserDAO USER_DAO = new UserDAOImpl();
-    private static final RoleDAO ROLE_DAO = new RoleDAOImpl();
+    private static final UserAndRoleDAO USER_AND_ROLE_DAO = new UserAndRoleDAOImpl();
 
     public static void main(String[] args) {
 
         Role role1 = new Role("Начальник");
-        Role role2 = new Role("Подчиненный");
+        Role role2 = new Role("специалист");
+        Role role3 = new Role("курьер");
 
-        User user1 = new User(1,"Андрей", "Andrey", "password1", role1);
-        User user2 = new User(2,"Борис", "Boris", "password2", role2);
-        User user3 = new User(3,"Владимир", "Vladimir", "password3", role2);
+        User user1 = new User("Андрей", "Andrey", "password1");
+        User user2 = new User("Борис", "Boris", "password2");
+        User user3 = new User("Владимир", "Vladimir", "password3");
+        User user4 = new User("Геннадий", "Gennady", "password4");
 
+        System.out.println("Создание роли"); // в таблицу ролей добавляются роли
+        USER_AND_ROLE_DAO.createRole(role1);
+        USER_AND_ROLE_DAO.createRole(role2);
+        USER_AND_ROLE_DAO.createRole(role3);
 
+        System.out.println("Создание пользователя"); // в таблицу юзеров добавляются юзеры
+        USER_AND_ROLE_DAO.createUser(user1);
+        USER_AND_ROLE_DAO.createUser(user2);
+        USER_AND_ROLE_DAO.createUser(user3);
+        USER_AND_ROLE_DAO.createUser(user4);
 
-
-
-        System.out.println("Список пользователей без ролей");
-        USER_DAO.getUsers().forEach(System.out::println);
+//        System.out.println("Добавление связи роли с пользователями");
+//        role1.addUserToRole(user1);
+//        role2.addUserToRole(user2);
+//        role2.addUserToRole(user3);
+//        role2.addUserToRole(user4);
+//        role3.addUserToRole(user4);
 //
-        System.out.println("Получение пользователя по id в БД");
-        User userId = USER_DAO.readById(28);
-        System.out.println(userId);
+//        System.out.println("Добавление связи пользователя с ролями");
+//        user4.addRoleToUser(role2);
+//        user4.addRoleToUser(role3);
 
-        System.out.println("Список пользователей по роли");
-        USER_DAO.getByRole(role1).forEach(System.out::println); // что-то не так, не выводится список с заданной ролью
 
-        System.out.println("Добавление пользователя с ролью");
-        ROLE_DAO.create(role1);
-        ROLE_DAO.create(role2);
-        USER_DAO.create(user1);
-        USER_DAO.create(user2);
-        USER_DAO.create(user3);
-        USER_DAO.getUsers().forEach(System.out::println);
+        System.out.println("Список всех пользователей без роли"); // нормально выводит
+        USER_AND_ROLE_DAO.readAll();
+
+//        System.out.println("Вывод пользователя по его id без роли"); // нормально выводит
+//        USER_AND_ROLE_DAO.getByUser(27);
+
+//        System.out.println("Вывод роли пользователя по его id"); // нормально выводит
+//        USER_AND_ROLE_DAO.getByRole(27);
+
+//        System.out.println("Удаление пользователя"); // удаляет нормально
+//        USER_AND_ROLE_DAO.deleteUser(34);
+
+        System.out.println("Редактирование пользователя"); // почему-то не редактируется
+        user3.setPassword("password300");
+        user3.addRoleToUser(role2);
+        USER_AND_ROLE_DAO.updateUser(user1);
+
+        USER_AND_ROLE_DAO.readAll();
 //
-        System.out.println("Удаление пользователя");
-        USER_DAO.deleteUser(USER_DAO.readById(25));
-        USER_DAO.getUsers().forEach(System.out::println);
+
+
+//
+
+//
+
 //
 
 
-        System.out.println("Редактирование пользователя");
-        USER_DAO.readById(27).setPassword("password4");
-        USER_DAO.update(USER_DAO.readById(27)); // поле password не обновляется, почему?
-        USER_DAO.getUsers().forEach(System.out::println);
     }
 }

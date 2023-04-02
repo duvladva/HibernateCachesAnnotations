@@ -1,7 +1,6 @@
 package dao.impl;
-
 import config.HibernateSessionFactoryUtil;
-import dao.UserDAO;
+import dao.UserAndRoleDAO;
 import model.Role;
 import model.User;
 import org.hibernate.Session;
@@ -10,70 +9,77 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
-public class UserDAOImpl implements UserDAO {
-
+public class UserAndRoleDAOImpl implements UserAndRoleDAO {
     @Override
-    public void create(User user) {
+    public void createUser(User user) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.save(user);
-            session.update(user.getRole());
+            session.persist(user);
+            transaction.commit();
+        }
+
+    }
+
+    @Override
+    public void createRole(Role role) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(role);
             transaction.commit();
         }
     }
 
     @Override
-    public void update(User users) {
+    public List<User> readAll() {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.update(users);
+            List <User> user = session.createQuery("from User", User.class).list();
+            System.out.println(user);
+            transaction.commit();
+            return user;
+        }
+    }
+
+
+    @Override
+    public User getByUser(int id) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            User user = session.get(User.class, id);
+            System.out.println(user+" "+ user.getRoles());
+            transaction.commit();
+            return user;
+        }
+    }
+
+    @Override
+    public Role getByRole(int id) {
+
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            Role role = session.get(Role.class, id);
+            System.out.println(role + " " + role.getUsers());
+            transaction.commit();
+            return role;
+        }
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            User user = session.get(User.class, id);
+            session.remove(user);
             transaction.commit();
         }
     }
 
     @Override
-    public void deleteUser(User user) {
+    public void updateUser(User user) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.delete(user);
+            session.update(user);
             transaction.commit();
         }
     }
-
-    @Override
-    public User readById(int id) {
-        User user;
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            user = session.get(User.class, id);
-            transaction.commit();
-        }
-        return user;
-    }
-
-    @Override
-    public List<User> getUsers() {
-        List<User> users;
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            users = session.createQuery("FROM User", User.class).list();
-            transaction.commit();
-        }
-        return users;
-    }
-
-    @Override
-    public List<User> getByRole(Role role) {
-        List<User> users;
-        Integer id = role.getId();
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            Query<User> query = session.createQuery("FROM User WHERE role.id = :id", User.class);
-            query.setParameter("id", id);
-            users = query.getResultList();
-            transaction.commit();
-        }
-        return users;
-    }
-
 }
